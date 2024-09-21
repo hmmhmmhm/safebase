@@ -3,7 +3,6 @@
   "type": "module",
   "version": "0.0.2",
   "description": "safebase is helps you safely compute very large numbers.",
-  "dependencies": {},
   "source": "src/index.ts",
   "exports": {
     "types": "./dist/index.d.ts",
@@ -16,7 +15,8 @@
   "scripts": {
     "build": "microbundle",
     "watch": "microbundle watch",
-    "test": "jest"
+    "test": "jest",
+    "release": "release-it"
   },
   "keywords": [
     "safe",
@@ -34,12 +34,18 @@
     "jest": "^29.7.0",
     "lint-staged": "^15.2.10",
     "microbundle": "^0.15.1",
+    "release-it": "^17.6.0",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.2"
   },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
+    }
+  },
+  "release-it": {
+    "hooks": {
+      "before:init": "npm run build"
     }
   },
   "lint-staged": {
