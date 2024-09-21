@@ -4,6 +4,8 @@
  * @returns
  */
 export function parseNumber(num: string) {
+  if (typeof num !== "number") num = num.toString();
+
   let sign = 1;
   if (num.startsWith("-")) {
     sign = -1;

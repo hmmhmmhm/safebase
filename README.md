@@ -1,15 +1,18 @@
-# SafeBase 🛡️
+# 🔢 safebase
 
-SafeBase is a lightweight, zero-dependency JavaScript library for safe and precise arithmetic operations on very large numbers. It excels at handling both Big Decimal and Big Number computations with ease. 🧮
+[![Poster Image](https://i.imgur.com/laLdMsB.png)](https://i.imgur.com/laLdMsB.png)
+
+> Tiny 2kb, zero deps, infinite precision: SafeBase for all your big integer + big decimal needs.
+
+SafeBase is a `Lightweight`, `Zero Dependency` JavaScript library for safe and precise arithmetic operations on `Big Integer` + `Big Decimal`. It excels at handling both Big Decimal and Big Integer computations with ease. 🧮
 
 ## Features 🌟
 
-- 📦 Easy installation: `npm i safebase`
-- 🪶 Lightweight: Only 2kb in size
-- 🔒 Zero dependencies
 - 🔢 Supports operations on extremely large numbers (Big Number)
+- 🔒 Zero dependencies
+- 🪶 Lightweight: Only 2kb in size
+- 💻 Full TypeScript support
 - 🎯 High precision decimal arithmetic (Big Decimal)
-- 💻 TypeScript support
 - 🔀 Seamless handling of both Big Decimal and Big Number operations
 
 ## Installation 📥
