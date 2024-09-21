@@ -28,6 +28,12 @@ describe("multiply function test", () => {
   test("Multiplying large numbers", () => {
     expect(multiply("999999999", "999999999")).toBe("999999998000000001");
     expect(multiply("1234567890", "9876543210")).toBe("12193263111263526900");
+    expect(
+      multiply(
+        "123456789012345678901234567890",
+        "987654321098765432109876543210"
+      )
+    ).toBe("121932631137021795226185032733622923332237463801111263526900");
   });
 
   test("Multiplying with one", () => {

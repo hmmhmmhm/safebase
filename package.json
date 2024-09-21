@@ -1,8 +1,9 @@
 {
   "name": "safebase",
   "type": "module",
-  "version": "0.0.1",
-  "description": "helps you safely compute very large numbers.",
+  "version": "0.0.2",
+  "description": "safebase is helps you safely compute very large numbers.",
+  "dependencies": {},
   "source": "src/index.ts",
   "exports": {
     "types": "./dist/index.d.ts",
