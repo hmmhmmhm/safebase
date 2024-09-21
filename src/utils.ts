@@ -167,3 +167,175 @@ export function removeLeadingZeros(str: string): string {
 export function removeTrailingZeros(str: string): string {
   return str.replace(/0+$/, "") || "0";
 }
+
+/**
+ * Function to subtract two numbers (num1 - num2, assuming num1 >= num2)
+ * @param num1
+ * @param num2
+ * @returns
+ */
+export function subtractStrings(num1: string, num2: string): string {
+  let result = "";
+  let borrow = 0;
+  num1 = num1.split("").reverse().join("");
+  num2 = num2.split("").reverse().join("");
+
+  for (let i = 0; i < num1.length; i++) {
+    let digit1 = parseInt(num1[i]) - borrow;
+    let digit2 = parseInt(num2[i] || "0");
+    if (digit1 < digit2) {
+      digit1 += 10;
+      borrow = 1;
+    } else {
+      borrow = 0;
+    }
+    result = digit1 - digit2 + result;
+  }
+
+  return removeLeadingZeros(result);
+}
+
+/**
+ * Function to multiply a number by a single digit
+ * @param num
+ * @param digit
+ * @returns
+ */
+export function multiplyDigit(num: string, digit: string): string {
+  let result = "";
+  let carry = 0;
+  let digitNum = parseInt(digit);
+  let numArray = num.split("").reverse();
+
+  for (let i = 0; i < numArray.length; i++) {
+    let product = parseInt(numArray[i]) * digitNum + carry;
+    result = (product % 10) + result;
+    carry = Math.floor(product / 10);
+  }
+
+  if (carry > 0) {
+    result = carry + result;
+  }
+
+  return result;
+}
+
+/**
+ * Function to compare two numbers
+ * @param num1
+ * @param num2
+ * @returns 1 if num1 > num2, -1 if num1 < num2, 0 if num1 == num2
+ */
+export function compare(num1: string, num2: string): number {
+  num1 = removeLeadingZeros(num1);
+  num2 = removeLeadingZeros(num2);
+  if (num1.length > num2.length) return 1;
+  if (num1.length < num2.length) return -1;
+  for (let i = 0; i < num1.length; i++) {
+    if (num1[i] > num2[i]) return 1;
+    if (num1[i] < num2[i]) return -1;
+  }
+  return 0;
+}
+
+/**
+ * Function to add two numbers
+ * @param num1
+ * @param num2
+ * @returns sum of num1 and num2
+ */
+export function addStrings(num1: string, num2: string): string {
+  let result = "";
+  let carry = 0;
+  let num1Arr = num1.split("").reverse();
+  let num2Arr = num2.split("").reverse();
+
+  let maxLength = Math.max(num1Arr.length, num2Arr.length);
+  for (let i = 0; i < maxLength; i++) {
+    let digit1 = parseInt(num1Arr[i] || "0");
+    let digit2 = parseInt(num2Arr[i] || "0");
+    let sum = digit1 + digit2 + carry;
+    result = (sum % 10) + result;
+    carry = Math.floor(sum / 10);
+  }
+  if (carry > 0) {
+    result = carry + result;
+  }
+  return result;
+}
+
+/**
+ * Function to remove leading zeros from the result
+ * @param str
+ * @returns
+ */
+export function removeLeadingZerosFromResult(str: string): string {
+  if (str[0] === "-") {
+    return "-" + removeLeadingZerosFromResult(str.slice(1));
+  }
+  let [integerPart, fractionalPart] = str.split(".");
+  integerPart = integerPart.replace(/^0+/, "") || "0";
+  if (fractionalPart !== undefined) {
+    return integerPart + "." + fractionalPart;
+  } else {
+    return integerPart;
+  }
+}
+
+/**
+ * Rounds the result to the specified precision
+ * @param result
+ * @param precision
+ * @returns
+ */
+export function roundResult(result: string, precision: number): string {
+  let [integerPart, fractionalPart] = result.split(".");
+  if (!fractionalPart) {
+    return result;
+  }
+
+  // Check if there are additional digits
+  if (fractionalPart.length <= precision) {
+    fractionalPart = fractionalPart.padEnd(precision + 1, "0");
+  }
+
+  // Get the digit to be rounded
+  let roundingDigit = parseInt(fractionalPart[precision]);
+
+  let fractionToRound = fractionalPart.slice(0, precision);
+
+  if (roundingDigit >= 5) {
+    // Combine integer and fractional parts to create a large number
+    let combinedNumber = integerPart + fractionToRound;
+
+    // Add 1
+    let incrementedNumber = addStrings(combinedNumber, "1");
+
+    // Separate into new integer and fractional parts
+    let combinedLength = integerPart.length + fractionToRound.length;
+    let incrementedLength = incrementedNumber.length;
+    let lengthDifference = incrementedLength - combinedLength;
+    let newIntegerPartLength = integerPart.length + lengthDifference;
+
+    let newIntegerPart = incrementedNumber.slice(0, newIntegerPartLength);
+    let newFractionalPart = incrementedNumber.slice(newIntegerPartLength);
+
+    result = newIntegerPart;
+    if (newFractionalPart) {
+      result += "." + newFractionalPart;
+    }
+  } else {
+    // No rounding needed
+    result = integerPart;
+    if (fractionToRound) {
+      result += "." + fractionToRound;
+    }
+  }
+
+  // Remove unnecessary trailing zeros in the fractional part
+  result = result.replace(/(\.\d*?[1-9])0+$/g, "$1");
+  result = result.replace(/\.0+$/, "");
+  result = result.replace(/\.$/, "");
+
+  return result;
+}

@@ -1,171 +1,82 @@
-import { parseNumber, removeLeadingZeros } from "./utils";
+import {
+  compare,
+  multiplyDigit,
+  parseNumber,
+  removeLeadingZeros,
+  removeLeadingZerosFromResult,
+  roundResult,
+  subtractStrings,
+} from "./utils";
 
 export function divide(
   left: string,
   right: string,
   precision: number = 20
 ): string {
-  // Function to compare two numbers
-  function compare(num1: string, num2: string): number {
-    num1 = removeLeadingZeros(num1);
-    num2 = removeLeadingZeros(num2);
-    if (num1.length > num2.length) return 1;
-    if (num1.length < num2.length) return -1;
-    for (let i = 0; i < num1.length; i++) {
-      if (num1[i] > num2[i]) return 1;
-      if (num1[i] < num2[i]) return -1;
-    }
-    return 0;
-  }
-
-  // Function to subtract two numbers (num1 - num2, assuming num1 >= num2)
-  function subtractStrings(num1: string, num2: string): string {
-    let result = "";
-    let borrow = 0;
-    num1 = num1.split("").reverse().join("");
-    num2 = num2.split("").reverse().join("");
-
-    for (let i = 0; i < num1.length; i++) {
-      let digit1 = parseInt(num1[i]) - borrow;
-      let digit2 = parseInt(num2[i] || "0");
-      if (digit1 < digit2) {
-        digit1 += 10;
-        borrow = 1;
-      } else {
-        borrow = 0;
-      }
-      result = digit1 - digit2 + result;
-    }
-
-    return removeLeadingZeros(result);
-  }
-
-  // Function to add two numbers
-  function addStrings(num1: string, num2: string): string {
-    let result = "";
-    let carry = 0;
-    let num1Arr = num1.split("").reverse();
-    let num2Arr = num2.split("").reverse();
-
-    let maxLength = Math.max(num1Arr.length, num2Arr.length);
-    for (let i = 0; i < maxLength; i++) {
-      let digit1 = parseInt(num1Arr[i] || "0");
-      let digit2 = parseInt(num2Arr[i] || "0");
-      let sum = digit1 + digit2 + carry;
-      result = (sum % 10) + result;
-      carry = Math.floor(sum / 10);
-    }
-    if (carry > 0) {
-      result = carry + result;
-    }
-    return result;
-  }
-
-  // Modified rounding function
-  function roundResult(result: string): string {
-    let [integerPart, fractionalPart] = result.split(".");
-    if (!fractionalPart) {
-      return result;
-    }
-
-    if (fractionalPart.length <= precision) {
-      return result;
-    }
-
-    // Digit to be rounded
-    let roundingDigit = parseInt(fractionalPart[precision]);
-    let fractionToRound = fractionalPart.slice(0, precision);
-
-    // Combine integer part and fraction to round into one large number (without removing leading zeros)
-    let combinedNumber = integerPart + fractionToRound;
-
-    if (roundingDigit >= 5) {
-      // Add 1
-      let incrementedNumber = addStrings(combinedNumber, "1");
-
-      // Separate new integer part and fractional part
-      let integerPartLength = integerPart.length;
-      let combinedLength = combinedNumber.length;
-      let incrementedLength = incrementedNumber.length;
-
-      // Check if the number of digits increased
-      let lengthDifference = incrementedLength - combinedLength;
-      integerPartLength += lengthDifference;
-
-      let newIntegerPart = incrementedNumber.slice(0, integerPartLength);
-      let newFractionalPart = incrementedNumber.slice(integerPartLength);
-
-      result = newIntegerPart;
-      if (newFractionalPart) {
-        result += "." + newFractionalPart;
-      }
-    } else {
-      // No rounding needed
-      result = integerPart;
-      if (fractionToRound) {
-        result += "." + fractionToRound;
-      }
-    }
-
-    // Remove unnecessary trailing zeros in the fractional part
-    result = result.replace(/(\.\d*?[1-9])0+$/g, "$1");
-    result = result.replace(/\.0+$/, "");
-    result = result.replace(/\.$/, "");
-
-    return result;
-  }
-
-  // Division function
-  function divideStrings(
+  // Modified long division algorithm
+  function longDivision(
     dividend: string,
     divisor: string,
     precision: number
   ): string {
     let result = "";
-    let remainder = dividend;
+    let remainder = "";
+    let dividendIndex = 0;
     let decimalPointAdded = false;
     let decimalPlaces = 0;
 
     // Calculate one more digit than the desired precision
     let maxDecimalPlaces = precision + 1;
 
-    while (true) {
-      // Calculate quotient
-      let count = "0";
-      while (compare(remainder, divisor) >= 0) {
-        remainder = subtractStrings(remainder, divisor);
-        count = addStrings(count, "1");
-      }
-      result += count;
-
-      // If remainder is 0, terminate
-      if (compare(remainder, "0") === 0) {
-        break;
-      }
-
-      // Handle decimal point
-      if (!decimalPointAdded) {
-        result += ".";
-        decimalPointAdded = true;
+    while (
+      dividendIndex < dividend.length ||
+      (decimalPlaces <= maxDecimalPlaces && compare(remainder, "0") !== 0)
+    ) {
+      if (dividendIndex < dividend.length) {
+        remainder += dividend[dividendIndex];
+        dividendIndex++;
       } else {
+        if (!decimalPointAdded) {
+          result += ".";
+          decimalPointAdded = true;
+        }
+        remainder += "0";
+      }
+
+      remainder = removeLeadingZeros(remainder);
+
+      let quotientDigit = "0";
+      if (compare(remainder, divisor) >= 0) {
+        // Find the quotient digit using binary search
+        let low = 0;
+        let high = 10;
+        while (low < high) {
+          let mid = Math.floor((low + high) / 2);
+          let product = multiplyDigit(divisor, mid.toString());
+          if (compare(product, remainder) <= 0) {
+            low = mid + 1;
+          } else {
+            high = mid;
+          }
+        }
+        quotientDigit = (low - 1).toString();
+        let subtractProduct = multiplyDigit(divisor, quotientDigit);
+        remainder = subtractStrings(remainder, subtractProduct);
+      }
+
+      result += quotientDigit;
+
+      // Increase decimalPlaces after the decimal point is added
+      if (decimalPointAdded) {
         decimalPlaces++;
-        if (decimalPlaces >= maxDecimalPlaces) {
+        if (decimalPlaces > maxDecimalPlaces) {
           break;
         }
       }
-
-      // Add 0 to remainder for next digit
-      remainder += "0";
-
-      // If remainder is 0 but desired precision not reached, add 0s
-      if (compare(remainder, "0") === 0 && decimalPlaces < maxDecimalPlaces) {
-        result += "0".repeat(maxDecimalPlaces - decimalPlaces);
-        break;
-      }
     }
 
-    // Apply rounding
-    result = roundResult(result);
+    // Round the result
+    result = roundResult(result, precision);
 
     return result || "0";
   }
@@ -196,13 +107,16 @@ export function divide(
   wholeNum1 = removeLeadingZeros(wholeNum1);
   wholeNum2 = removeLeadingZeros(wholeNum2);
 
-  // Determine sign
+  // Determine the sign of the result
   let resultSign = num1.sign * num2.sign;
 
   // Perform division
-  let quotient = divideStrings(wholeNum1, wholeNum2, precision);
+  let quotient = longDivision(wholeNum1, wholeNum2, precision);
 
-  // Apply sign to result
+  // Remove leading zeros from the integer part of the result
+  quotient = removeLeadingZerosFromResult(quotient);
+
+  // Apply the sign to the result
   if (resultSign === -1 && quotient !== "0") {
     quotient = "-" + quotient;
   }

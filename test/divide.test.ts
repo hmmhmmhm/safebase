@@ -56,10 +56,8 @@ describe("divide function test", () => {
   test(
     "Dividing large numbers",
     async () => {
-      // TODO Why is it slow?
-      // expect(divide("1000000000000000", "1000000")).toBe("1000000000");
-      // expect(divide("9999999999", "3")).toBe("3333333333");
-      // expect(divide("9999999", "3")).toBe("3333333");
+      expect(divide("1000000000000000", "1000000")).toBe("1000000000");
+      expect(divide("9999999999", "3")).toBe("3333333333");
     },
     TIME_OUT
   );
