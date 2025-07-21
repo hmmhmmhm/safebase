@@ -21,6 +21,129 @@ export function parseNumber(num: string) {
 }
 
 /**
+ * Enhanced number parsing that handles edge cases and normalizes zero
+ * @param num Number as string
+ * @returns Object with sign, integer part, and fractional part
+ */
+export function parseStringNumber(num: string) {
+  if (typeof num !== "string") {
+    num = String(num);
+  }
+
+  let sign = 1;
+  if (num.startsWith("-")) {
+    sign = -1;
+    num = num.substring(1);
+  } else if (num.startsWith("+")) {
+    num = num.substring(1);
+  }
+
+  if (!num || num === "") {
+    return { sign: 1, integerPart: "0", fractionalPart: "" };
+  }
+
+  let [integerPart, fractionalPart] = num.split(".");
+  if (!integerPart) integerPart = "0";
+  if (!fractionalPart) fractionalPart = "";
+
+  integerPart = integerPart.replace(/^0+/, "") || "0";
+  
+  if (integerPart === "0" && (!fractionalPart || fractionalPart.replace(/0/g, "") === "")) {
+    sign = 1;
+  }
+
+  return {
+    sign,
+    integerPart,
+    fractionalPart,
+  };
+}
+
+/**
+ * Checks if a number is an integer
+ * @param num Number as string
+ * @returns true if integer, false otherwise
+ */
+export function isInteger(num: string): boolean {
+  const parsed = parseStringNumber(num);
+  return !parsed.fractionalPart || parsed.fractionalPart === "";
+}
+
+/**
+ * Checks if a number is zero
+ * @param num Number as string
+ * @returns true if zero, false otherwise
+ */
+export function isZero(num: string): boolean {
+  const parsed = parseStringNumber(num);
+  return parsed.integerPart === "0" && (!parsed.fractionalPart || parsed.fractionalPart.replace(/0/g, "") === "");
+}
+
+/**
+ * Adds 1 to a positive integer string
+ * @param num Positive integer as string
+ * @returns Result as string
+ */
+export function addOne(num: string): string {
+  let result = "";
+  let carry = 1;
+  
+  for (let i = num.length - 1; i >= 0; i--) {
+    let digit = num[i];
+    let digitValue = 0;
+    
+    if (digit >= "0" && digit <= "9") {
+      digitValue = digit.charCodeAt(0) - "0".charCodeAt(0);
+    }
+    
+    let sum = digitValue + carry;
+    result = String(sum % 10) + result;
+    carry = sum >= 10 ? 1 : 0;
+  }
+  
+  if (carry > 0) {
+    result = "1" + result;
+  }
+  
+  return result;
+}
+
+/**
+ * Subtracts 1 from a positive integer string (assuming num > 0)
+ * @param num Positive integer as string
+ * @returns Result as string
+ */
+export function subtractOne(num: string): string {
+  if (num === "0") return "0";
+  
+  let result = "";
+  let borrow = 1;
+  
+  for (let i = num.length - 1; i >= 0; i--) {
+    let digit = num[i];
+    let digitValue = 0;
+    
+    if (digit >= "0" && digit <= "9") {
+      digitValue = digit.charCodeAt(0) - "0".charCodeAt(0);
+    }
+    
+    let diff = digitValue - borrow;
+    if (diff < 0) {
+      diff += 10;
+      borrow = 1;
+    } else {
+      borrow = 0;
+    }
+    
+    result = String(diff) + result;
+  }
+  
+  result = result.replace(/^0+/, "") || "0";
+  
+  return result;
+}
+
+/**
  * Function to compare absolute values of two parsed numbers
  * @param a
  * @param b
